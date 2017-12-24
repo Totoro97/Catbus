@@ -121,16 +121,18 @@ class Paint_Widget(QWidget):
 		self.update()
 	
 	def add_pix(self, text):
-		text = text[4: -7]
+		#text = text[4: -7]
 		colors = text.split(':')
 		for _ in colors :
 			R, G, B, XX, XY, YX, YY = _.split(',')
 			self.points.append((int(R), int(G), int(B), QPoint(int(XX),int(XY)), QPoint(int(YX), int(YY))))
-
+		self.update()
+		
 	def pix2str(self, pix) :
 		R, G, B, X, Y = pix
 		text = str(R) + ',' + str(G) + ',' + str(B) + ',' + str(X.x()) + ',' + str(X.y()) + ',' + str(Y.x()) + ',' + str(Y.y())
 		return text
+
 	def mouseReleaseEvent(self, e):
 		self.setCursor(QCursor(Qt.ArrowCursor))
 		self.pressing = False

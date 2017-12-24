@@ -9,15 +9,14 @@ import threading
 
 global conn
 global catbus
-global pix_pool
-global mess_pool
-global user_pool
-global PIX_pt
-global MESS_pt
-global USER_pt
-global pix_pt
-global mess_pt
-global user_pt
+global pix_pool, mess_pool, user_pool
+global PIX_pt, MESS_pt, USER_pt
+global pix_pt, mess_pt, user_pt
+global pix_lock, mess_lock, user_lock
+pix_lock = threading.Lock()
+mess_lock = threading.Lock()
+user_lock = threading.Lock()
+
 pix_pt = 0
 PIX_pt = 0
 mess_pt = 0
@@ -27,6 +26,7 @@ USER_pt = 0
 pix_pool = []
 mess_pool = []
 user_pool = []
+
 
 class Main_Window(QWidget):
 	
@@ -117,6 +117,7 @@ class Main_Window(QWidget):
 		self.paint_widget.add_pix(text)
 	def send_mess(self):
 		text = 'MESS:' + self.catbus.user_name + '<-DIV->' + self.chat_widget.toPlainText() + '<-END->'
+		print('I want to send: ' + text)
 		global conn
 		conn.sendall(bytes(text, encoding = 'utf-8'))
 
@@ -141,15 +142,9 @@ class Catbus():
 		self.window.add_pix(text)
 
 	def flush(self):
-		global pix_pool
-		global mess_pool
-		global user_pool
-		global PIX_pt
-		global MESS_pt
-		global USER_pt
-		global pix_pt
-		global mess_pt
-		global user_pt
+		global pix_pool, mess_pool, user_pool
+		global PIX_pt, MESS_pt, USER_pt
+		global pix_pt, mess_pt, user_pt
 		#print('flushing')
 		while (pix_pt < PIX_pt) :
 			self.add_pix(pix_pool[pix_pt])
@@ -164,8 +159,7 @@ class Catbus():
 		while (mess_pt < MESS_pt) :
 			user_name, text_ = mess_pool[mess_pt].split('<-DIV->')
 			mess_pt += 1
-			self.window.message_frame.add_message(text_, user_name == self.user_name)
-			mess_pt += 1
+			self.window.message_frame.add_message(user_name + ' : ' + text_, user_name == self.user_name)
 		#print('flushed')
 
 	def fuck(self):
@@ -182,45 +176,65 @@ def recv(conn) :
 			break
 	return text
 
-def sock() :
-	global conn
-	global catbus
-	global pix_pool
-	global mess_pool
-	global user_pool
-	global PIX_pt
-	global MESS_pt
-	global USER_pt
-	while True :
-		text = recv(conn)
-		print(text)
-		if text[:3] == 'PIX' :
-			pix_pool.append(text)
-			PIX_pt += 1
-			#print('recv pix')
-			#catbus.add_pix(text)
-		elif text[:4] == 'MESS' :
-			mess_pool.append(text[5:-7])
-			MESS_pt += 1
-			#user_name, text_ = text[5:-7].split('<-DIV->')
-			#catbus.window.message_frame.add_message(text_, user_name == catbus.user_name)
-			#catbus.fuck()
-		elif text[:4] == 'USER' :
-			user_name = text[5:-7]
-			user_pool.append(user_name)
-			USER_pt += 1
-			#if user_name[0] == '+' :
-				#user_pool.append
-				#catbus.window.userlist_widget.add_user(user_name[1:])
-			#if user_name[0] == '-' :
-				#catbus.window.userlist_widget.del_user(user_name[1:])
+def update_pix_pool(text) :
+	texts = text.split(':')
+	pix_lock.acquire()
+	global PIX_pt, pix_pool
+	for _ in texts :
+		print(_)
+		#R, G, B, XX, XY, YX, YY = _.split(',')
+		#pix_pool.append((int(R), int(G), int(B), QPoint(int(XX), int(XY)), QPoint(int(YX), int(YY))))
+		pix_pool.append(_)
+		PIX_pt += 1
+	pix_lock.release()
+
+def update_mess_pool(text) :
+	mess_lock.acquire()
+	global mess_pool, MESS_pt
+	mess_pool.append(text)
+	MESS_pt += 1
+	mess_lock.release()
+
+def update_user_pool(text) :
+	user_lock.acquire()
+	global user_pool, USER_pt
+	user_pool.append(text)
+	USER_pt += 1
+	user_lock.release()
+
+def add_pool(text) :	
+	print('recv: ' + text)
+	if (text[:3] == 'PIX') :
+		update_pix_pool(text[4:])
+	elif (text[:4] == 'MESS') :
+		update_mess_pool(text[5:])
+	elif (text[:4] == 'USER') :
+		update_user_pool(text[5:])
+
+def thread_recv() :
+	text = ''
+	while True:
+		try: 
+			ret_bytes = conn.recv(4096)
+		except BaseException:
+			return
+		text += str(ret_bytes, encoding = 'utf-8')
+		while True :
+			index = text.find('<-END->')
+			if (index > -1) :
+				new_text = text[:index]
+				text = text[index + 7:]
+				add_pool(new_text)
+			else : 
+				break
 
 if __name__ == '__main__' :	
 	app = QApplication(sys.argv)
-	catbus = Catbus('127.0.0.1', 5001)
-	network = threading.Thread(target = sock)
+	catbus = Catbus('127.0.0.1', 5000)
+	network = threading.Thread(target = thread_recv)
 	network.start()
 	app.exec_()
-	print('hello')
+	print('EXIT.')
+	conn.sendall(bytes('USER:-' + catbus.user_name + '<-END->', encoding = 'utf-8'))
 	conn.sendall(bytes('EXIT<-END->', encoding = 'utf-8'))
 	conn.close()

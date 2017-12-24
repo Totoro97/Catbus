@@ -3,9 +3,9 @@ import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWebKitWidgets import QWebView
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 
-class Message_Frame(QWebView):
+class Message_Frame(QWebEngineView):
 	
 	def __init__(self, father = None) :
 		super().__init__(father)
@@ -25,12 +25,12 @@ class Message_Frame(QWebView):
 		self.show()
 
 	def add_message(self, text, mark) :
-		if mark :
+		if not mark :
 			text = self.Ahead + text + self.Atail
 		else :
 			text = self.Bhead + text + self.Btail
 		self.messages += '\n' + text + '\n'
-		print(self.html_text + self.messages + '</body></html>')
+		#print(self.html_text + self.messages + '</body></html>')
 		self.setHtml(self.html_text + self.messages + '</body></html>')
 		#self.reload()
 		#self.update()

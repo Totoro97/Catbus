@@ -1,11 +1,11 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
-from PyQt5.QtWebKitWidgets import QWebView
+from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 import sys, time
 
-class Userlist_Widget(QWebView) :
+class Userlist_Widget(QWebEngineView) :
 	
 	def __init__(self, father = None) :
 		super().__init__(father)
@@ -30,7 +30,7 @@ class Userlist_Widget(QWebView) :
 		out_str = ''
 		for _ in self.users :
 			out_str += _ + '\n<br>\n'
-		self.setHtml(out_str)
+		self.setHtml('<body style=\"font-family:Arial,Verdana,Sans-serif\">' + out_str + '</body>')
 	
 	#def mousePressEvent(self, e) :
 	#	self.add_user('hahahha' + str(self.cnt))
