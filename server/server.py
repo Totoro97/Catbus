@@ -25,8 +25,8 @@ sk.bind(("127.0.0.1", 5000))
 sk.listen(10)
 
 def pix2str(self, pix) :
-	R, G, B, X, Y = pix
-	text = str(R) + ',' + str(G) + ',' + str(B) + ',' + str(X.x()) + ',' + str(X.y()) + ',' + str(Y.x()) + ',' + str(Y.y())
+	R, G, B, W, X, Y = pix
+	text = str(R) + ',' + str(G) + ',' + str(B) + ',' + str(W) + ',' + str(X.x()) + ',' + str(X.y()) + ',' + str(Y.x()) + ',' + str(Y.y())
 	return text
 
 def update_pix_pool(text) :
@@ -35,8 +35,8 @@ def update_pix_pool(text) :
 	global PIX_pt, pix_pool
 	for _ in texts :
 		print(_)
-		R, G, B, XX, XY, YX, YY = _.split(',')
-		pix_pool.append((int(R), int(G), int(B), QPoint(int(XX), int(XY)), QPoint(int(YX), int(YY))))
+		R, G, B, W, XX, XY, YX, YY = _.split(',')
+		pix_pool.append((int(R), int(G), int(B), int(W), QPoint(int(XX), int(XY)), QPoint(int(YX), int(YY))))
 		PIX_pt += 1
 	pix_lock.release()
 

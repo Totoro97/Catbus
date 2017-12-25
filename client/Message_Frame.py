@@ -21,7 +21,7 @@ class Message_Frame(QWebEngineView):
 		
 	def init_UI(self) :
 		#self.setGeometry(0, 0, 240, 400)
-		self.setHtml(self.html_text + self.Ahead + '\nfuck you\n' + self.Atail + '</body></html>')
+		self.setHtml(self.html_text + '</body></html>')
 		self.show()
 
 	def add_message(self, text, mark) :

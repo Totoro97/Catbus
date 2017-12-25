@@ -28,7 +28,7 @@ mess_pool = []
 user_pool = []
 
 
-class Main_Window(QWidget):
+class Main_Window(QMainWindow):
 	
 	def __init__(self, catbus):
 		super().__init__()
@@ -36,27 +36,40 @@ class Main_Window(QWidget):
 		self.catbus = catbus
 		self.W = 1200
 		self.H = 700
-		self.paint_widget = Paint_Widget.Paint_Widget(self, conn)
+		self.paint_area = QScrollArea(self)
+		self.paint_widget = Paint_Widget.Paint_Widget(self.paint_area, conn)
+		self.paint_area.setWidget(self.paint_widget)
 		self.message_frame = Message_Frame.Message_Frame(self)
 		self.userlist_widget = Userlist_Widget.Userlist_Widget(self)
 		self.chat_widget = QTextEdit(self)
 		self.changeco_btn = QPushButton('选择颜色', self)
+		self.changeco_btn.clicked.connect(self.changeco)
 		self.send_btn = QPushButton('发送消息', self)
 		self.send_btn.clicked.connect(self.send_mess)
-		self.brush_label = QLabel('笔刷大小: 5', self)
+		#self.brush_label = QLabel('笔刷大小: ', self)
+		self.brush_slider = QSlider(Qt.Horizontal, self)
+		self.brush_slider.setMinimum(1)
+		self.brush_slider.setMaximum(20)
+		self.brush_slider.setValue(5)
+		self.brush_slider.valueChanged.connect(self.changewidth)
 		self.init_UI()
 	
 	def init_UI(self):
+		#self.setStyleSheet("QMainWindow {background: #808080;}")
 		self.setWindowTitle('Catbus')
 		self.setGeometry(0, 0, self.W, self.H)
-		self.paint_widget.setGeometry(10, 10, self.W - 350, self.H - 20)
+		self.paint_area.setGeometry(10, 10, self.W - 350, self.H - 20)
+		#self.paint_widget.setGeometry(10, 10, self.W - 350, self.H - 20)
+		self.message_frame.setStyleSheet('border: 1px solid #000000')
 		self.message_frame.setGeometry(870, 10, 320, 350)
 		self.chat_widget.setGeometry(870, 370, 320, 100)
-		self.changeco_btn.move(870, 480)
+		self.changeco_btn.setGeometry(870, 480, 75, 30)
 		self.send_btn.setStyleSheet("font-size: 15px")
-		self.send_btn.move(970, 480)
-		self.brush_label.setStyleSheet("font-size: 15px")
-		self.brush_label.move(1070, 480)
+		self.send_btn.setGeometry(960, 480, 75, 30)
+		#self.brush_label.setStyleSheet("font-size: 15px")
+		#self.brush_label.move(1000, 480)
+		self.brush_slider.setGeometry(1060, 488, 108, 15)
+		#bself.brush_slider.show()
 		self.userlist_widget.setGeometry(870, 520, 320, 170)
 
 		self.show()
@@ -115,12 +128,21 @@ class Main_Window(QWidget):
 
 	def add_pix(self, text):
 		self.paint_widget.add_pix(text)
+		
 	def send_mess(self):
 		text = 'MESS:' + self.catbus.user_name + '<-DIV->' + self.chat_widget.toPlainText() + '<-END->'
 		print('I want to send: ' + text)
 		global conn
 		conn.sendall(bytes(text, encoding = 'utf-8'))
-
+	
+	def changeco(self):
+		co = QColorDialog.getColor()
+		if co.isValid() :
+			self.paint_widget.set_color(co)
+	
+	def changewidth(self):
+		self.paint_widget.set_width(self.brush_slider.value())
+		
 class Catbus():
 	def __init__(self, ip, port):
 		global conn

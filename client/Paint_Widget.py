@@ -41,7 +41,7 @@ class Paint_Widget(QWidget):
 
 
 	def init_UI(self):
-		self.setGeometry(100, 100, 100, 100)
+		self.setGeometry(0, 0, 2000, 1600)
 		return
 	
 	def init_canvas(self):
@@ -80,10 +80,11 @@ class Paint_Widget(QWidget):
 		#pen.setBrush(QBrush(Qt.RadialGradientPattern))
 		pen.setCapStyle(Qt.RoundCap)
 		pen.setJoinStyle(Qt.RoundJoin)
-		painter.setPen(pen)
 		filler = QPainter(self)
-		for (cR, cG, cB, A, B) in self.points:
+		for (cR, cG, cB, wid, A, B) in self.points:
 			pen.setColor(QColor(cR, cG, cB))
+			pen.setWidth(wid)
+			painter.setPen(pen)
 			painter.drawLine(A, B)
 			
 		new_canvas = self.canvas.scaled(
@@ -114,6 +115,7 @@ class Paint_Widget(QWidget):
 			self.color_R,
 			self.color_G,
 			self.color_B,
+			self.brush_size,
 			x,
 			y
 		)) + '<-END->', encoding = 'utf-8'))
@@ -124,19 +126,26 @@ class Paint_Widget(QWidget):
 		#text = text[4: -7]
 		colors = text.split(':')
 		for _ in colors :
-			R, G, B, XX, XY, YX, YY = _.split(',')
-			self.points.append((int(R), int(G), int(B), QPoint(int(XX),int(XY)), QPoint(int(YX), int(YY))))
+			R, G, B, W, XX, XY, YX, YY = _.split(',')
+			self.points.append((int(R), int(G), int(B), int(W), QPoint(int(XX),int(XY)), QPoint(int(YX), int(YY))))
 		self.update()
 		
 	def pix2str(self, pix) :
-		R, G, B, X, Y = pix
-		text = str(R) + ',' + str(G) + ',' + str(B) + ',' + str(X.x()) + ',' + str(X.y()) + ',' + str(Y.x()) + ',' + str(Y.y())
+		R, G, B, W, X, Y = pix
+		text = str(R) + ',' + str(G) + ',' + str(B) + ',' + str(W) + ',' + str(X.x()) + ',' + str(X.y()) + ',' + str(Y.x()) + ',' + str(Y.y())
 		return text
 
 	def mouseReleaseEvent(self, e):
 		self.setCursor(QCursor(Qt.ArrowCursor))
 		self.pressing = False
 
+	def set_color(self, co) :
+		self.color_R = co.red()
+		self.color_G = co.green()
+		self.color_B = co.blue()
+
+	def set_width(self, W) :
+		self.brush_size = W
 
 if __name__ == '__main__' :
 	app = QApplication(sys.argv)
