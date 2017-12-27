@@ -1,6 +1,7 @@
 import socket
 import threading
 import time
+import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
@@ -19,10 +20,6 @@ user_pool = []
 pix_lock = threading.Lock()
 mess_lock = threading.Lock()
 user_lock = threading.Lock()
-
-sk = socket.socket()
-sk.bind(("127.0.0.1", 5000))
-sk.listen(10)
 
 def pix2str(self, pix) :
 	R, G, B, W, X, Y = pix
@@ -139,6 +136,17 @@ def sing(conn, addr) :
 			print('close')
 			conn.close()
 			return
+
+if (len(sys.argv) < 2) :
+	myip = '127.0.0.1'
+	myport = 5000
+else :
+	myip, myport = sys.argv[1].split(':')
+	myport = int(myport)
+	
+sk = socket.socket()
+sk.bind((myip, myport))
+sk.listen(10)
 
 while True :
 	conn, addr = sk.accept()

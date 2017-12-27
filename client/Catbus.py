@@ -36,9 +36,9 @@ class Main_Window(QMainWindow):
 		self.catbus = catbus
 		self.W = 1200
 		self.H = 700
-		self.paint_area = QScrollArea(self)
-		self.paint_widget = Paint_Widget.Paint_Widget(self.paint_area, conn)
-		self.paint_area.setWidget(self.paint_widget)
+		#self.paint_area = QScrollArea(self)
+		self.paint_widget = Paint_Widget.Paint_Widget(self, conn)
+		#self.paint_area.setWidget(self.paint_widget)
 		self.message_frame = Message_Frame.Message_Frame(self)
 		self.userlist_widget = Userlist_Widget.Userlist_Widget(self)
 		self.chat_widget = QTextEdit(self)
@@ -55,23 +55,27 @@ class Main_Window(QMainWindow):
 		self.init_UI()
 	
 	def init_UI(self):
-		#self.setStyleSheet("QMainWindow {background: #808080;}")
+		self.setStyleSheet("QMainWindow {background: #4a4a4a;}")
 		self.setWindowTitle('Catbus')
 		self.setGeometry(0, 0, self.W, self.H)
-		self.paint_area.setGeometry(10, 10, self.W - 350, self.H - 20)
-		#self.paint_widget.setGeometry(10, 10, self.W - 350, self.H - 20)
+		#self.paint_area.setGeometry(10, 10, self.W - 350, self.H - 20)
+		self.paint_widget.setGeometry(10, 10, self.W - 350, self.H - 20)
+		self.paint_widget.setStyleSheet('background: #000000')
+		#self.paint_area.verticalScrollBar().setStyleSheet('width: 15px; background: #000000;')
 		self.message_frame.setStyleSheet('border: 1px solid #000000')
 		self.message_frame.setGeometry(870, 10, 320, 350)
 		self.chat_widget.setGeometry(870, 370, 320, 100)
+		self.chat_widget.setStyleSheet('background: #404040; border: 0px; color: #FFFFFF')
 		self.changeco_btn.setGeometry(870, 480, 75, 30)
-		self.send_btn.setStyleSheet("font-size: 15px")
+		self.changeco_btn.setStyleSheet("background: #303030; color: #FFFFFF; font-size: 12px")
+		self.send_btn.setStyleSheet("background: #303030; color: #FFFFFF; font-size: 12px")
 		self.send_btn.setGeometry(960, 480, 75, 30)
 		#self.brush_label.setStyleSheet("font-size: 15px")
 		#self.brush_label.move(1000, 480)
 		self.brush_slider.setGeometry(1060, 488, 108, 15)
 		#bself.brush_slider.show()
 		self.userlist_widget.setGeometry(870, 520, 320, 170)
-
+		self.userlist_widget.setStyleSheet('background: #404040; border: 0px')
 		self.show()
 	
 	def resizeEvent(self, e) :
@@ -83,6 +87,17 @@ class Main_Window(QMainWindow):
 			biasx + self.paint_widget.width(), 
 			biasy + self.paint_widget.height()
 		)
+		self.message_frame.setGeometry(
+			self.message_frame.pos().x() + biasx, 
+			self.message_frame.pos().y(),
+			self.message_frame.width(),
+			biasy + self.message_frame.height()
+		)
+		self.chat_widget.move(self.chat_widget.pos().x() + biasx, self.chat_widget.pos().y() + biasy)
+		self.changeco_btn.move(self.changeco_btn.pos().x() + biasx, self.changeco_btn.pos().y() + biasy)
+		self.send_btn.move(self.send_btn.pos().x() + biasx, self.send_btn.pos().y() + biasy)
+		self.brush_slider.move(self.brush_slider.pos().x() + biasx, self.brush_slider.pos().y() + biasy)
+		self.userlist_widget.move(self.userlist_widget.pos().x() + biasx, self.userlist_widget.pos().y() + biasy)
 		self.W = self.width()
 		self.H = self.height()
 		
@@ -181,7 +196,7 @@ class Catbus():
 		while (mess_pt < MESS_pt) :
 			user_name, text_ = mess_pool[mess_pt].split('<-DIV->')
 			mess_pt += 1
-			self.window.message_frame.add_message(user_name + ' : ' + text_, user_name == self.user_name)
+			self.window.message_frame.add_message(user_name, text_, user_name == self.user_name)
 		#print('flushed')
 
 	def fuck(self):
@@ -252,7 +267,13 @@ def thread_recv() :
 
 if __name__ == '__main__' :	
 	app = QApplication(sys.argv)
-	catbus = Catbus('127.0.0.1', 5000)
+	if (len(sys.argv) < 2) :
+		myip = '127.0.0.1'
+		myport = 5000
+	else :
+		myip, myport = sys.argv[1].split(':')
+	myport = int(myport)
+	catbus = Catbus(myip, myport)
 	network = threading.Thread(target = thread_recv)
 	network.start()
 	app.exec_()

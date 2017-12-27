@@ -30,7 +30,7 @@ class Userlist_Widget(QWebEngineView) :
 		out_str = ''
 		for _ in self.users :
 			out_str += _ + '\n<br>\n'
-		self.setHtml('<body style=\"font-family:Arial,Verdana,Sans-serif\">' + out_str + '</body>')
+		self.setHtml('<body style=\"color: #FFFFFF; background-color: #404040; font-family:Arial,Verdana,Sans-serif\">' + out_str + '</body>')
 	
 	#def mousePressEvent(self, e) :
 	#	self.add_user('hahahha' + str(self.cnt))

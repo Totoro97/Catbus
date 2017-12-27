@@ -24,9 +24,9 @@ class Message_Frame(QWebEngineView):
 		self.setHtml(self.html_text + '</body></html>')
 		self.show()
 
-	def add_message(self, text, mark) :
+	def add_message(self, username, text, mark) :
 		if not mark :
-			text = self.Ahead + text + self.Atail
+			text = self.Ahead + username + ' : ' + text + self.Atail
 		else :
 			text = self.Bhead + text + self.Btail
 		self.messages += '\n' + text + '\n'

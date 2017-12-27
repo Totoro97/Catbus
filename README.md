@@ -1,4 +1,6 @@
-Catbus - A simple stupid paint & chat room.
+### Catbus - A simple stupid paint & chat room.
+
+(一款简单的茶绘小程序)
 
 Use python socket & PyQt5.
 
@@ -6,9 +8,11 @@ Only for network homework.
 
 
 
-![2017-12-24 14-54-17屏幕截图.png](https://i.loli.net/2017/12/24/5a3f4f4d8cc83.png)
+![2017-12-27 12-10-37屏幕截图.png](https://i.loli.net/2017/12/27/5a4320af0ee79.png)
 
 
+
+### usage
 
 run server:
 
@@ -23,4 +27,8 @@ run client:
 cd client
 python Catbus.py
 ```
+
+use +/- to zoom in/zoom out
+
+use w/s/a/d to move the canvas
 
